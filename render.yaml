@@ -1,0 +1,20 @@
+databases:
+  - name: anime_wallpaper
+    plan: free
+    databaseName: anime_wallpaper
+    user: anime_wallpaper_user
+
+services:
+  - type: web
+    plan: free
+    name: mysite
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker"
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://anime_wallpaper_user:1XoYqHm6KX912QFZJdGdCWtCa1vffjwx@dpg-cqdl7c0gph6c73a87a40-a.oregon-postgres.render.com/anime_wallpaper
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4

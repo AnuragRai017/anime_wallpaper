@@ -1,0 +1,144 @@
+<!-- templates/images/image_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Image Gallery{% endblock %}
+
+{% block content %}
+<style>
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  @media (min-width: 640px) {
+    .sm\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 768px) {
+    .md\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .lg\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .gap-4 {
+    gap: 1rem;
+  }
+
+  .bg-gray-800 {
+    background-color: #2d3748;
+  }
+
+  .rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
+
+  .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  .h-48 {
+    height: 12rem;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .object-cover {
+    object-fit: cover;
+  }
+
+  .p-4 {
+    padding: 1rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .text-gray-400 {
+    color: #cbd5e0;
+  }
+</style>
+<div class="flex max-w-7xl mx-auto py-8">
+    <!-- Sidebar with categories -->
+    <aside class="w-1/4 pr-4">
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h2 class="text-2xl font-bold mb-4">Categories</h2>
+            <ul class="space-y-2">
+                {% for category in categories %}
+                <li><a href="{% url 'image_list' %}?category={{ category.id }}" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 rounded">{{ category.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main content area -->
+    <section class="w-3/4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-gradient-to-b from-black to-blue-900 p-4 rounded-lg">
+            {% for image in page_obj %}
+            <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                <a href="{% url 'image_detail' image.pk %}">
+                    <img src="{{ image.image.url }}" alt="{{ image.title }}" class="w-full h-48 object-cover">
+                </a>
+                <div class="p-4">
+                    <h2 class="text-xl font-semibold text-white">{{ image.title }}</h2>
+                    <p class="text-gray-400">
+                        Categories:
+                        {% for category in image.categories.all %}
+                        {{ category.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Pagination controls -->
+        <div class="mt-8">
+            <nav class="flex justify-center">
+                <ul class="inline-flex items-center">
+                    {% if page_obj.has_previous %}
+                    <li>
+                        <a href="?{% if category_id %}category={{ category_id }}&{% endif %}page=1" class="px-3 py-2 mx-1 bg-gray-800 text-white rounded-md">First</a>
+                    </li>
+                    <li>
+                        <a href="?{% if category_id %}category={{ category_id }}&{% endif %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 mx-1 bg-gray-800 text-white rounded-md">Previous</a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li>
+                        <span class="px-3 py-2 mx-1 bg-blue-500 text-white rounded-md">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
+                    <li>
+                        <a href="?{% if category_id %}category={{ category_id }}&{% endif %}page={{ num }}" class="px-3 py-2 mx-1 bg-gray-800 text-white rounded-md">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li>
+                        <a href="?{% if category_id %}category={{ category_id }}&{% endif %}page={{ page_obj.next_page_number }}" class="px-3 py-2 mx-1 bg-gray-800 text-white rounded-md">Next</a>
+                    </li>
+                    <li>
+                        <a href="?{% if category_id %}category={{ category_id }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 mx-1 bg-gray-800 text-white rounded-md">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </section>
+</div>
+{% endblock %}
